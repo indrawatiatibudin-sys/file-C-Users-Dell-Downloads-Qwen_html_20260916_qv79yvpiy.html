@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Tarik Tambang Grammar - SMK Kelas 10</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; }
+  body {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    min-height: 100vh;
+    color: #fff;
+    padding: 20px;
+  }
+  h1 { text-align:center; margin-bottom:10px; text-shadow:2px 2px 4px #000; }
+  .subtitle { text-align:center; margin-bottom:20px; opacity:0.9; }
+
+  .arena {
+    position: relative;
+    background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 60%, #8B4513 60%, #8B4513 100%);
+    border-radius: 15px;
+    padding: 30px 20px 60px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+
+  .teams {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 10px;
+  }
+  .team {
+    text-align: center;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    min-width: 140px;
+  }
+  .team-left { background: #27ae60; }
+  .team-right { background: #c0392b; }
+  .team .emoji { font-size: 50px; display:block; }
+
+  .rope-container {
+    position: relative;
+    height: 30px;
+    background: repeating-linear-gradient(
+      45deg,
+      #8B4513,
+      #8B4513 10px,
+      #A0522D 10px,
+      #A0522D 20px
+    );
+    border-radius: 15px;
+    margin: 20px 0;
+    box-shadow: inset 0 3px 6px rgba(0,0,0,0.4);
+  }
+  .marker {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 70px;
+    background: #f1c40f;
+    border: 3px solid #000;
+    border-radius: 5px;
+    transition: left 0.6s cubic-bezier(.68,-0.55,.27,1.55);
+    z-index: 5;
+  }
+  .marker::after {
+    content: "🎗️";
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+  }
+  .center-line {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 50px;
+    background: #fff;
+    opacity: 0.5;
+  }
+
+  .info-bar {
+    display: flex;
+    justify-content: space-around;
+    background: rgba(0,0,0,0.4);
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  .info-bar div { font-size: 16px; }
+  .info-bar span { color: #f1c40f; font-weight: bold; }
+
+  .question-box {
+    background: rgba(255,255,255,0.95);
+    color: #222;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+  }
+  .q-number { color: #2a5298; font-weight: bold; margin-bottom: 8px; }
+  .q-topic {
+    display: inline-block;
+    background: #3498db;
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+  .q-text { font-size: 20px; margin-bottom: 20px; line-height: 1.5; }
+
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .option {
+    background: #ecf0f1;
+    border: 2px solid #bdc3c7;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+    text-align: left;
+  }
+  .option:hover:not(:disabled) { background: #3498db; color: #fff; border-color: #2980b9; }
+  .option:disabled { cursor: not-allowed; }
+  .option.correct { background: #27ae60; color: #fff; border-color: #1e8449; }
+  .option.wrong { background: #c0392b; color: #fff; border-color: #922b21; }
+
+  .feedback {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: bold;
+    min-height: 20px;
+  }
+  .feedback.correct { background: #d5f5e3; color: #1e8449; }
+  .feedback.wrong { background: #fadbd8; color: #922b21; }
+
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+  }
+  .overlay.show { display: flex; }
+  .modal {
+    background: #fff;
+    color: #222;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 500px;
+    animation: pop 0.5s;
+  }
+  @keyframes pop {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .modal h2 { font-size: 32px; margin-bottom: 15px; }
+  .modal p { font-size: 18px; margin-bottom: 20px; }
+  .btn {
+    background: #2a5298;
+    color: #fff;
+    border: none;
+    padding: 12px 30px;
+    font-size: 16px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .btn:hover { background: #1e3c72; }
+
+  @media (max-width: 600px) {
+    .options { grid-template-columns: 1fr; }
+    .team { font-size: 14px; min-width: 100px; }
+    .team .emoji { font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>🏆 TARIK TAMBANG GRAMMAR 🏆</h1>
+<p class="subtitle">Descriptive Text • Simple Present • Present Continuous • To Be • Pronoun</p>
+
+<div class="arena">
+  <div class="teams">
+    <div class="team team-left">
+      <span class="emoji">🧑‍🎓</span>
+      TIM SISWA
+    </div>
+    <div class="team team-right">
+      <span class="emoji">🤖</span>
+      TIM KOMPUTER
+    </div>
+  </div>
+
+  <div class="rope-container">
+    <div class="center-line"></div>
+    <div class="marker" id="marker"></div>
+  </div>
+</div>
+
+<div class="info-bar">
+  <div>Soal: <span id="qNum">1</span> / 25</div>
+  <div>Benar (Siswa): <span id="scoreLeft">0</span></div>
+  <div>Salah (Komputer): <span id="scoreRight">0</span></div>
+</div>
+
+<div class="question-box">
+  <div class="q-topic" id="qTopic">Topic</div>
+  <div class="q-number" id="qLabel">Question 1</div>
+  <div class="q-text" id="qText">Loading...</div>
+  <div class="options" id="options"></div>
+  <div class="feedback" id="feedback"></div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2 id="resultTitle">🎉</h2>
+    <p id="resultText"></p>
+    <button class="btn" onclick="location.reload()">🔁 Main Lagi</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  { topic:"Simple Present", q:"She ___ to school every day.", opts:["go","goes","going","gone"], ans:1 },
+  { topic:"Present Continuous", q:"Look! They ___ football in the yard.", opts:["play","plays","are playing","is playing"], ans:2 },
+  { topic:"To Be", q:"I ___ a student of SMK Kelas 10.", opts:["am","is","are","be"], ans:0 },
+  { topic:"Pronoun", q:"___ is my English teacher. She is very kind.", opts:["He","She","It","They"], ans:1 },
+  { topic:"Simple Present", q:"My father ___ coffee every morning.", opts:["don't drink","doesn't drink","isn't drink","not drinks"], ans:1 },
+  { topic:"Present Continuous", q:"Be quiet! The baby ___ now.", opts:["sleeps","sleep","is sleeping","are sleeping"], ans:2 },
+  { topic:"To Be", q:"They ___ from Surabaya.", opts:["am","is","are","be"], ans:2 },
+  { topic:"Pronoun", q:"This book is ___. I bought it yesterday.", opts:["my","mine","me","I"], ans:1 },
+  { topic:"Simple Present", q:"___ you speak English fluently?", opts:["Does","Do","Are","Is"], ans:1 },
+  { topic:"Present Continuous", q:"We ___ a descriptive text right now.", opts:["write","writes","are writing","is writing"], ans:2 },
+  { topic:"To Be", q:"The cat ___ very cute and fluffy.", opts:["am","is","are","be"], ans:1 },
+  { topic:"Pronoun", q:"___ are my best friends since childhood.", opts:["They","Them","Their","Us"], ans:0 },
+  { topic:"Simple Present", q:"The sun ___ in the east.", opts:["rise","rises","rising","is rise"], ans:1 },
+  { topic:"Present Continuous", q:"What ___ you doing at the moment?", opts:["do","does","are","is"], ans:2 },
+  { topic:"To Be", q:"It ___ a beautiful day today.", opts:["am","is","are","be"], ans:1 },
+  { topic:"Pronoun", q:"Please give ___ the pen. I need it.", opts:["I","my","mine","me"], ans:3 },
+  { topic:"Simple Present", q:"Birds ___ to the south in winter.", opts:["fly","flies","flying","are fly"], ans:0 },
+  { topic:"Present Continuous", q:"Listen! Someone ___ the piano.", opts:["play","plays","is playing","are playing"], ans:2 },
+  { topic:"To Be", q:"We ___ happy to see you again.", opts:["am","is","are","be"], ans:2 },
+  { topic:"Pronoun", q:"Is this ___ bag? It looks new.", opts:["you","your","yours","yourself"], ans:1 },
+  { topic:"Simple Present", q:"My mother ___ delicious fried rice.", opts:["cook","cooks","cooking","is cook"], ans:1 },
+  { topic:"Present Continuous", q:"I ___ a very interesting book now.", opts:["read","reads","am reading","is reading"], ans:2 },
+  { topic:"To Be", q:"You ___ very smart and diligent.", opts:["am","is","are","be"], ans:2 },
+  { topic:"Pronoun", q:"___ name is Andi. He is my classmate.", opts:["My","His","Her","Your"], ans:1 },
+  { topic:"Mixed", q:"She ___ tall and she ___ long black hair.", opts:["is / have","is / has","are / has","am / has"], ans:1 }
+];
+
+let current = 0;
+let scoreLeft = 0;
+let scoreRight = 0;
+let position = 50; // persen, 50 = tengah
+
+const marker = document.getElementById('marker');
+const qNum = document.getElementById('qNum');
+const scoreLeftEl = document.getElementById('scoreLeft');
+const scoreRightEl = document.getElementById('scoreRight');
+const qTopic = document.getElementById('qTopic');
+const qLabel = document.getElementById('qLabel');
+const qText = document.getElementById('qText');
+const optionsEl = document.getElementById('options');
+const feedback = document.getElementById('feedback');
+
+function loadQuestion() {
+  if (current >= questions.length) {
+    endGame();
+    return;
+  }
+  const q = questions[current];
+  qNum.textContent = current + 1;
+  qTopic.textContent = q.topic;
+  qLabel.textContent = `Question ${current + 1}`;
+  qText.innerHTML = q.q.replace("___", "<span style='color:#c0392b;font-weight:bold;'>_____</span>");
+  optionsEl.innerHTML = "";
+  feedback.textContent = "";
+  feedback.className = "feedback";
+
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = String.fromCharCode(65+i) + ". " + opt;
+    btn.onclick = () => selectAnswer(i, btn);
+    optionsEl.appendChild(btn);
+  });
+}
+
+function selectAnswer(i, btn) {
+  const q = questions[current];
+  const buttons = optionsEl.querySelectorAll('.option');
+  buttons.forEach(b => b.disabled = true);
+
+  if (i === q.ans) {
+    btn.classList.add('correct');
+    scoreLeft++;
+    position -= 4; // tali ke kiri
+    feedback.textContent = "✅ BENAR! Tali bergerak ke arah SISWA!";
+    feedback.className = "feedback correct";
+  } else {
+    btn.classList.add('wrong');
+    buttons[q.ans].classList.add('correct');
+    scoreRight++;
+    position += 4; // tali ke kanan
+    feedback.textContent = "❌ SALAH! Tali bergerak ke arah KOMPUTER!";
+    feedback.className = "feedback wrong";
+  }
+
+  // Batasi posisi
+  if (position < 5) position = 5;
+  if (position > 95) position = 95;
+
+  marker.style.left = position + '%';
+  scoreLeftEl.textContent = scoreLeft;
+  scoreRightEl.textContent = scoreRight;
+
+  // Cek menang/kalah dini
+  if (position <= 5) {
+    setTimeout(() => showResult(true), 1200);
+    return;
+  }
+  if (position >= 95) {
+    setTimeout(() => showResult(false), 1200);
+    return;
+  }
+
+  current++;
+  setTimeout(loadQuestion, 1500);
+}
+
+function endGame() {
+  if (scoreLeft > scoreRight) showResult(true);
+  else if (scoreLeft < scoreRight) showResult(false);
+  else showResult(null);
+}
+
+function showResult(studentWin) {
+  const overlay = document.getElementById('overlay');
+  const title = document.getElementById('resultTitle');
+  const text = document.getElementById('resultText');
+  overlay.classList.add('show');
+
+  if (studentWin === true) {
+    title.textContent = "🎉 SISWA MENANG! 🎉";
+    text.innerHTML = `Selamat! Kamu berhasil mengalahkan komputer!<br>
+      Skor Akhir: <b>${scoreLeft}</b> benar - <b>${scoreRight}</b> salah<br>
+      Kamu menguasai Simple Present, Present Continuous, To Be, dan Pronoun!`;
+  } else if (studentWin === false) {
+    title.textContent = "🤖 KOMPUTER MENANG!";
+    text.innerHTML = `Sayang sekali, komputer menarik tambang lebih kuat!<br>
+      Skor Akhir: <b>${scoreLeft}</b> benar - <b>${scoreRight}</b> salah<br>
+      Ayo pelajari lagi materinya dan coba lagi! 💪`;
+  } else {
+    title.textContent = "🤝 SERI!";
+    text.innerHTML = `Pertandingan berakhir imbang!<br>
+      Skor: <b>${scoreLeft}</b> benar - <b>${scoreRight}</b> salah`;
+  }
+}
+
+loadQuestion();
+</script>
+</body>
+</html>
